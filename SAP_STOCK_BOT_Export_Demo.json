@@ -1,0 +1,313 @@
+{
+  "metadata": {
+    "schemaVersion": "1.0",
+    "importType": "LEX",
+    "importFormat": "JSON"
+  },
+  "resource": {
+    "name": "SAP_STOCK_BOT",
+    "version": "7",
+    "intents": [
+      {
+        "name": "Saludo",
+        "version": "4",
+        "fulfillmentActivity": {
+          "type": "ReturnIntent"
+        },
+        "sampleUtterances": [
+          "hola",
+          "ayuda",
+          "buenas",
+          "buenos días",
+          "buenas tardes"
+        ],
+        "slots": [],
+        "followUpPrompt": {
+          "prompt": {
+            "messages": [
+              {
+                "groupNumber": 1,
+                "contentType": "PlainText",
+                "content": "¿En que puedo ayudarte? ¿Deseas conocer la disponibilidad de un material o generar una orden de compra?"
+              }
+            ],
+            "maxAttempts": 3
+          },
+          "rejectionStatement": {
+            "messages": [
+              {
+                "groupNumber": 1,
+                "contentType": "PlainText",
+                "content": "Gracias por usar SAPoweredByAWSLex, que tengas un gran día."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "rejectionStatement": {
+          "messages": [
+            {
+              "contentType": "PlainText",
+              "content": "Gracias por su respuesta, la Orden de Compra será descartada."
+            }
+          ]
+        },
+        "name": "PURCHASEORDER",
+        "version": "18",
+        "fulfillmentActivity": {
+          "codeHook": {
+            "uri": "arn:aws:lambda:<region>:<idcuenta>:function:CreatePO",
+            "messageVersion": "1.0"
+          },
+          "type": "CodeHook"
+        },
+        "sampleUtterances": [
+          "Orden de Compra",
+          "Comprar",
+          "Deseo generar una orden de compra",
+          "Comprar {slotCantidadPO} del material {slotMaterialPO} para el almacen {slotPlantaPO}",
+          "Incrementar en {slotCantidadPO} el material {slotMaterialPO} en el almacen {slotPlantaPO}",
+          "Quiero comprar {slotCantidadPO} unidades de {slotMaterialPO}",
+          "comprar {slotCantidadPO} {slotMaterialPO} para {slotPlantaPO}",
+          "{slotCantidadPO} {slotMaterialPO}  {slotPlantaPO}",
+          "Comprar {slotMaterialPO}",
+          "Adquirir {slotMaterialPO}",
+          "Incrementar {slotMaterialPO}",
+          "Aprovisionar {slotMaterialPO}",
+          "Comprar {slotMaterialPO} en {slotPlantaPO}",
+          "Comprar {slotCantidadPO}",
+          "Adquirir {slotCantidadPO}",
+          "Incrementar {slotCantidadPO}",
+          "Aprovisionar {slotCantidadPO}"
+        ],
+        "slots": [
+          {
+            "sampleUtterances": [
+              "La cantidad de {slotCantidadPO}",
+              "Quiero {slotCantidadPO}"
+            ],
+            "slotType": "AMAZON.NUMBER",
+            "obfuscationSetting": "NONE",
+            "slotConstraint": "Required",
+            "valueElicitationPrompt": {
+              "messages": [
+                {
+                  "contentType": "PlainText",
+                  "content": "¿Qué cantidad del material {slotMaterialPO} deseas comprar?"
+                }
+              ],
+              "responseCard": "{\"version\":1,\"contentType\":\"application/vnd.amazonaws.card.generic\"}",
+              "maxAttempts": 2
+            },
+            "priority": 3,
+            "name": "slotCantidadPO"
+          },
+          {
+            "sampleUtterances": [],
+            "slotType": "material",
+            "slotTypeVersion": "5",
+            "obfuscationSetting": "NONE",
+            "slotConstraint": "Required",
+            "valueElicitationPrompt": {
+              "messages": [
+                {
+                  "contentType": "PlainText",
+                  "content": "¿Qué material deseas comprar?"
+                }
+              ],
+              "responseCard": "{\"version\":1,\"contentType\":\"application/vnd.amazonaws.card.generic\",\"genericAttachments\":[]}",
+              "maxAttempts": 2
+            },
+            "priority": 1,
+            "name": "slotMaterialPO"
+          },
+          {
+            "sampleUtterances": [],
+            "slotType": "planta",
+            "slotTypeVersion": "2",
+            "obfuscationSetting": "NONE",
+            "slotConstraint": "Required",
+            "valueElicitationPrompt": {
+              "messages": [
+                {
+                  "contentType": "PlainText",
+                  "content": "¿En qué almacen deseas comprar el material {slotMaterialPO}?"
+                }
+              ],
+              "responseCard": "{\"version\":1,\"contentType\":\"application/vnd.amazonaws.card.generic\",\"genericAttachments\":[]}",
+              "maxAttempts": 2
+            },
+            "priority": 2,
+            "name": "slotPlantaPO"
+          }
+        ],
+        "confirmationPrompt": {
+          "messages": [
+            {
+              "contentType": "PlainText",
+              "content": "¿Esta seguro de crear una Orden de Compra por {slotCantidadPO} unidades del material {slotMaterialPO} para el almacen {slotPlantaPO}?"
+            }
+          ],
+          "maxAttempts": 3
+        },
+        "dialogCodeHook": {
+          "uri": "arn:aws:lambda:<region>:<idcuenta>:function:IntentPO",
+          "messageVersion": "1.0"
+        }
+      },
+      {
+        "name": "STOCK",
+        "version": "19",
+        "fulfillmentActivity": {
+          "codeHook": {
+            "uri": "arn:aws:lambda:<region>:<idcuenta>:function:GetStock",
+            "messageVersion": "1.0"
+          },
+          "type": "CodeHook"
+        },
+        "sampleUtterances": [
+          "stock {slotMaterial} centro {slotPlanta}",
+          "Cuanto stok hay de {slotMaterial} en {slotPlanta}",
+          "Cuanto queda de {slotMaterial} en {slotPlanta}",
+          "En {slotPlanta} cuantos {slotMaterial} quedan",
+          "Cuanto hay",
+          "¿Tenemos stock?",
+          "Cantidades",
+          "stock",
+          "disponibilidad",
+          "{slotPlanta}  {slotMaterial}",
+          " {slotMaterial} {slotPlanta}",
+          "Deseo conocer la disponibilidad de un material",
+          "Deseo conocer la disponibilidad de {slotMaterial} en {slotPlanta}",
+          "conocer disponibilidad de {slotMaterial}",
+          "disponibilidad de {slotMaterial}",
+          "conocer el stock {slotMaterial}",
+          "cuanto queda de {slotMaterial}",
+          "cuanto hay de {slotMaterial}",
+          "cuanto de {slotMaterial}",
+          "Cuanto stock hay de {slotMaterial}",
+          "consultar",
+          "consultar material {slotMaterial}",
+          "stock {slotMaterial}",
+          "producto {slotMaterial}",
+          "material {slotMaterial}"
+        ],
+        "slots": [
+          {
+            "sampleUtterances": [],
+            "slotType": "material",
+            "slotTypeVersion": "5",
+            "obfuscationSetting": "NONE",
+            "slotConstraint": "Required",
+            "valueElicitationPrompt": {
+              "messages": [
+                {
+                  "contentType": "PlainText",
+                  "content": "¿Qué material deseas consultar?"
+                }
+              ],
+              "responseCard": "{\"version\":1,\"contentType\":\"application/vnd.amazonaws.card.generic\",\"genericAttachments\":[]}",
+              "maxAttempts": 2
+            },
+            "priority": 1,
+            "name": "slotMaterial"
+          },
+          {
+            "sampleUtterances": [
+              "Centro {slotPlanta}",
+              "Centro de Logística {slotPlanta}",
+              "Planta {slotPlanta}",
+              "Almacen {slotPlanta}"
+            ],
+            "slotType": "planta",
+            "slotTypeVersion": "2",
+            "obfuscationSetting": "NONE",
+            "slotConstraint": "Required",
+            "valueElicitationPrompt": {
+              "messages": [
+                {
+                  "contentType": "PlainText",
+                  "content": "¿En qué almacen deseas consultar el material {slotMaterial} ?"
+                }
+              ],
+              "responseCard": "{\"version\":1,\"contentType\":\"application/vnd.amazonaws.card.generic\",\"genericAttachments\":[]}",
+              "maxAttempts": 2
+            },
+            "priority": 2,
+            "name": "slotPlanta"
+          }
+        ]
+      }
+    ],
+    "slotTypes": [
+      {
+        "description": "materiales a ser consultados",
+        "name": "material",
+        "version": "5",
+        "enumerationValues": [
+          {
+            "value": "Laptop"
+          },
+          {
+            "value": "flopy disk"
+          },
+          {
+            "value": "generador",
+            "synonyms": []
+          },
+          {
+            "value": "celular"
+          },
+          {
+            "value": "monitor"
+          },
+          {
+            "value": "iphone"
+          },
+          {
+            "value": "cable"
+          },
+          {
+            "value": "AD-333-300"
+          }
+        ],
+        "valueSelectionStrategy": "ORIGINAL_VALUE"
+      },
+      {
+        "description": "planta donde se almacena el slot",
+        "name": "planta",
+        "version": "2",
+        "enumerationValues": [
+          {
+            "value": "New York"
+          }
+        ],
+        "valueSelectionStrategy": "ORIGINAL_VALUE"
+      }
+    ],
+    "voiceId": "Mia",
+    "childDirected": false,
+    "locale": "es-419",
+    "idleSessionTTLInSeconds": 300,
+    "clarificationPrompt": {
+      "messages": [
+        {
+          "contentType": "PlainText",
+          "content": "Lo siento, puedes repetir?"
+        }
+      ],
+      "maxAttempts": 5
+    },
+    "abortStatement": {
+      "messages": [
+        {
+          "contentType": "PlainText",
+          "content": "Disculpa, no he entendido como puedo ayudarte. Por favor contactarte con el equipo de soporte al 555-5555."
+        }
+      ]
+    },
+    "detectSentiment": false,
+    "enableModelImprovements": true
+  }
+}
